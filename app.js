@@ -39,10 +39,10 @@ var sess = {
     secret: server_config.session_secret,
     saveUninitialized: false,
     resave: false,
-    cookie : {}
+    cookie: {}
 };
 
-if(env === 'productionnnn' || env === 'test') {
+if (env === 'productionnnn' || env === 'test') {
     app.set('trust proxy', 1);
     sess.cookie.secure = true;
 }
