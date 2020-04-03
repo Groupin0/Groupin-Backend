@@ -39,7 +39,7 @@ var sess = {
     secret: server_config.session_secret,
     saveUninitialized: false,
     resave: false,
-    cookie: {}
+    cookie : {}
 };
 
 if (env === 'productionnnn' || env === 'test') {
@@ -62,11 +62,11 @@ const is_prod = process.env.NODE_ENV === 'production';
 // The root provides a resolver function for each API endpoint
 var root = app.use(
     '/graphql',
-    graphqlHTTP({
+    graphqlHTTP((req) => ({
         schema: schema,
         // graphiql only when not in production
         graphiql: !is_prod,
-        context: { db: db },
+        context: { db: db, user: req.user },
         customFormatErrorFn: (error) => {
             // We'd like to translate the error we've gotten to the FormatError
             // if it exists and then report it, if such object does not exist,
@@ -87,9 +87,10 @@ var root = app.use(
 
             return secondary_error;
         }
-    })
+    }))
 );
 
+app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

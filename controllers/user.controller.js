@@ -33,6 +33,7 @@ passport.use(
             const { email, name, picture, id } = profile._json;
             db.User.findOne({ where: { email } }).then((user) => {
                 if (user) {
+                    console.log('User already exists. successful connection');
                     return done(null, user);
                 } else {
                     var newUser = {
@@ -42,15 +43,19 @@ passport.use(
                         provider_user_id: id,
                         img_source: picture.data.url
                     };
-                    db.User.create(newUser).then((newUser, created) => {
-                        if (!newUser) {
-                            return done(null, false, {
-                                message: 'user creation failed'
-                            });
-                        } else {
+                    db.User.create(newUser)
+                        .then((newUser, created) => {
+                            if (!newUser) {
+                                return done(null, false, {
+                                    message: 'user creation failed'
+                                });
+                            } else {
                             return done(null, newUser);
                         }
-                    });
+                    })
+                        .catch((err) => {
+                            return done(err);
+                        });
                 }
             });
         }
