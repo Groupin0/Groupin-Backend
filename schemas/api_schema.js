@@ -202,7 +202,13 @@ type Mutation {
             },
             // A hacky naive seach for now, to get sessions that contain the given text in one of several fields
             // TODO: create a true seaching infrastructure, maybe like elastic-search?
-            SearchSessions: (parent, { search_query, start, count}, { db }, info) => {
+            SearchSessions: (
+                parent,
+                { search_query, start, count },
+                { db },
+                info
+            ) => {
+                check_sessions_count(count);
                 var words = search_query.split(' ');
                 var sqlWords = words
                     .map((s) => s.trim())
