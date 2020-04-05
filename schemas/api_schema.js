@@ -104,7 +104,7 @@ type Query {
     SessionsByUser(user_id: ID!, start: Int!, count: Int!): [Session!]
     ResessionsByCategory(category: ID!, start: Int!, count: Int!): [Resession!]
     ResessionsByUser(user_id: ID!, start: Int!, count: Int!): [Resession!]
-    SearchSessions(search_query: String!): [Session!]
+    SearchSessions(search_query: String!, start: Int!, count: Int!): [Session!]
 }
 
 input TimeRange {
@@ -184,6 +184,7 @@ type Mutation {
                 check_sessions_count(count);
                 return db.Resession.findAll({
                     where: { user_id },
+                    offset: start,
                     limit: count
                 });
             },
@@ -201,13 +202,14 @@ type Mutation {
             },
             // A hacky naive seach for now, to get sessions that contain the given text in one of several fields
             // TODO: create a true seaching infrastructure, maybe like elastic-search?
-            SearchSessions: (parent, { search_query }, { db }, info) => {
+            SearchSessions: (parent, { search_query, start, count}, { db }, info) => {
                 var words = search_query.split(' ');
                 var sqlWords = words
                     .map((s) => s.trim())
                     .filter(String)
                     .map((word) => ({ [Op.like]: `%${word.trim()}%` }));
                 var condition = {
+                    active: true,
                     [Op.or]: [
                         {
                             description: {
@@ -227,7 +229,9 @@ type Mutation {
                     ]
                 };
                 return db.Session.findAll({
-                    where: condition
+                    where: condition,
+                    offset: start,
+                    limit: count
                 });
             }
         },
